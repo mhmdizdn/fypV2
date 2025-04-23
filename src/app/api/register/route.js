@@ -20,6 +20,7 @@ export async function POST(request) {
     // Add the user
     console.log("Attempting to add user to database...");
     const result = await addUser({
+      name: body.name,
       email: body.email,
       password: body.password,
       createdAt: new Date()

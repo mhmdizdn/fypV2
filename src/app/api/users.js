@@ -2,27 +2,34 @@ import prisma from '../lib/prisma';
 
 export async function addUser(user) {
   try {
-    // Check if email already exists (Prisma will handle this via the unique constraint)
+    console.log('Attempting to add user:', { ...user, password: '[REDACTED]' });
+    
     const existingUser = await prisma.user.findUnique({
       where: { email: user.email }
     });
 
     if (existingUser) {
+      console.log('User already exists:', user.email);
       return { success: false, message: "Email already registered" };
     }
     
-    // Add user to the database
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
+        name: user.name,
         email: user.email,
-        password: user.password, // In a real app, you should hash this password
+        password: user.password,
         createdAt: user.createdAt || new Date()
       }
     });
     
+    console.log('User created successfully:', newUser.id);
     return { success: true, message: "Registration successful" };
   } catch (error) {
-    console.error("Error adding user:", error);
+    console.error("Detailed error:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
     return { success: false, message: "Database error occurred" };
   }
 }
